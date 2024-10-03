@@ -18,50 +18,50 @@ import UIKit
 @objc
 public class RewardedAdUnit: BaseInterstitialAdUnit,
                              RewardedEventInteractionDelegate {
-   
-    @objc public private(set) var reward: NSObject?
-    
     // MARK: - Lifecycle
     
-    @objc public convenience init(configID: String, eventHandler: AnyObject) {
+    @objc public convenience init(
+        configID: String,
+        eventHandler: AnyObject
+    ) {
         self.init(
             configID: configID,
             minSizePerc: nil,
-            eventHandler: eventHandler)
+            eventHandler: eventHandler
+        )
     }
 
     @objc public convenience init(configID: String) {
         self.init(
             configID: configID,
             minSizePerc: nil,
-            eventHandler: RewardedEventHandlerStandalone())
+            eventHandler: RewardedEventHandlerStandalone()
+        )
     }
     
-    @objc required init(configID:String, minSizePerc: NSValue?, eventHandler: AnyObject?) {
+    @objc required init(
+        configID: String,
+        minSizePerc: NSValue?,
+        eventHandler: AnyObject?
+    ) {
         super.init(
             configID: configID,
             minSizePerc: minSizePerc,
-            eventHandler: eventHandler)
+            eventHandler: eventHandler
+        )
         
-        adUnitConfig.adConfiguration.isOptIn = true
-        adFormats = [.video]
+        adUnitConfig.adConfiguration.isRewarded = true
+        adFormats = [.banner, .video]
     }
     
-    // MARK: - PBMRewardedEventDelegate
-    @objc public func userDidEarnReward(_ reward: NSObject?) {
-        DispatchQueue.main.async(execute: { [weak self] in
-            self?.reward = reward
-            self?.callDelegate_rewardedAdUserDidEarnReward()
-        })
+    // MARK: - RewardedEventDelegate
+    
+    @objc public func userDidEarnReward(_ reward: PrebidReward) {
+        DispatchQueue.main.async {
+            self.callDelegate_rewardedAdUserDidEarnReward(reward: reward)
+        }
     }
     
-    // MARK: - BaseInterstitialAdUnitProtocol protocol
-    
-    @objc public override func interstitialControllerDidCloseAd(_ interstitialController: InterstitialController) {
-        callDelegate_rewardedAdUserDidEarnReward()
-        super.interstitialControllerDidCloseAd(interstitialController)
-    }
-
     // MARK: - Protected overrides
     
     @objc public override func callDelegate_didReceiveAd() {
@@ -140,9 +140,9 @@ public class RewardedAdUnit: BaseInterstitialAdUnit,
     
     // MARK: - Private helpers
     
-    func callDelegate_rewardedAdUserDidEarnReward() {
+    func callDelegate_rewardedAdUserDidEarnReward(reward: PrebidReward) {
         if let delegate = self.delegate as? RewardedAdUnitDelegate {
-            delegate.rewardedAdUserDidEarnReward?(self)
+            delegate.rewardedAdUserDidEarnReward?(self, reward: reward)
         }
     }
 }
