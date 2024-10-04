@@ -137,6 +137,7 @@ public class BannerView: UIView,
                                 adUnitConfiguration: adUnitConfig)
             },
             adLoader: bannerAdLoader,
+            adUnitConfig: adUnitConfig,
             delegate: self,
             configValidationBlock: { adUnitConfig, renderWithPrebid in
                 true
